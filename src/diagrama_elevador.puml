@@ -1,0 +1,22 @@
+@startuml
+
+class Elevador {
+  - andarAtual: int
+  - totalAndares: int
+  - portaAberta: boolean
+
+  + subir(): void
+  + descer(): void
+  + abrirPorta(): void
+  + fecharPorta(): void
+  + mostrarPorta(): void
+  + mostrarAndarAtual(): void
+}
+
+class Main {
+  + main(args: String[]): void
+}
+
+Main --> Elevador : usa
+
+@enduml
