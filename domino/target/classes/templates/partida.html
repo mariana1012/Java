@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Partida de dominó</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <script th:src="@{/js/jogo.js}" defer></script>
+</head>
+<body>
+<main class="container largo">
+    <nav class="topbar">
+        <a th:href="@{/}">Voltar ao início</a>
+        <a th:href="@{/ranking}">Ranking</a>
+    </nav>
+
+    <h1>Partida <span th:text="${view.id()}">1</span></h1>
+
+    <p class="erro" th:if="${erro != null}" th:text="${erro}"></p>
+
+    <section class="card resultado" th:if="${!view.emAndamento()}">
+        <h2 th:text="${view.resultado()}">Resultado</h2>
+        <p>Peças que sobraram na mão da IA:</p>
+        <div class="mao-ia">
+            <th:block th:each="p : ${view.maoIAFinal()}">
+                <div th:replace="~{fragments :: peca(${p.a()}, ${p.b()})}"></div>
+            </th:block>
+            <span th:if="${view.maoIAFinal().isEmpty()}">nenhuma</span>
+        </div>
+        <p><a class="btn" th:href="@{/}">Nova partida</a> <a class="btn secundario" th:href="@{/ranking}">Ver ranking</a></p>
+    </section>
+
+    <!-- IA -->
+    <section class="jogador jogador-ia">
+        <div class="cabecalho-jogador">
+            <strong th:text="${view.nomeIA()}">Dominó-IA</strong> <span class="badge-ia">IA</span>
+            <span class="info">- <span th:text="${view.pecasIA()}">7</span> peças na mão</span>
+        </div>
+        <div id="maoIA" class="mao-virada" th:attr="data-qtd=${view.pecasIA()}"></div>
+        <div class="ia-fala" th:if="${view.ultimoComentarioIA() != null}">
+            <em th:text="${view.ultimoComentarioIA()}">comentário</em>
+        </div>
+    </section>
+
+    <!-- Mesa -->
+    <div class="barra-mesa">
+        <span>Monte: <strong th:text="${view.pecasMonte()}">14</strong> peças</span>
+        <span th:if="${view.pontaEsquerda() != null}">
+            Pontas: <strong th:text="${view.pontaEsquerda()}">6</strong> e <strong th:text="${view.pontaDireita()}">2</strong>
+        </span>
+    </div>
+    <div id="tabuleiro" class="tabuleiro"
+         th:attr="data-mesa=${view.mesaTexto()},data-centro=${view.indiceCentro()},data-vez=${view.vezDoHumano()}"></div>
+
+    <!-- Jogador -->
+    <section class="jogador">
+        <div class="cabecalho-jogador">
+            <strong th:text="${view.nomeJogador()}">Você</strong>
+            <span class="info">- <span th:text="${view.mao().size()}">7</span> peças na mão</span>
+        </div>
+
+        <p class="dica" th:if="${view.emAndamento() and view.vezDoHumano() and !view.podeComprar() and !view.podePassar()}">
+            Sua vez! Arraste uma peça até uma ponta da mesa (ou clique na peça e depois na ponta).
+        </p>
+        <p class="dica" th:if="${view.podeComprar()}">Você não tem peça para jogar. Compre uma peça do monte.</p>
+        <p class="dica" th:if="${view.podePassar()}">Você não tem peça para jogar e o monte acabou. Passe a vez.</p>
+
+        <div class="mao">
+            <div class="carta" th:each="m : ${view.mao()}"
+                 th:attr="data-peca=${m.peca().toString()},data-esq=${m.podeEsquerda()},data-dir=${m.podeDireita()}"
+                 th:classappend="${view.vezDoHumano() and (m.podeEsquerda() or m.podeDireita())} ? 'jogavel' : 'bloqueada'">
+                <div th:replace="~{fragments :: peca(${m.peca().a()}, ${m.peca().b()})}"></div>
+            </div>
+        </div>
+
+        <div class="acoes">
+            <form th:if="${view.podeComprar()}" th:action="@{/partidas/{id}/comprar(id=${view.id()})}" method="post">
+                <button type="submit" class="btn">Comprar do monte</button>
+            </form>
+            <form th:if="${view.podePassar()}" th:action="@{/partidas/{id}/passar(id=${view.id()})}" method="post">
+                <button type="submit" class="btn">Passar a vez</button>
+            </form>
+        </div>
+    </section>
+
+    <form id="formJogada" method="post" th:action="@{/partidas/{id}/jogar(id=${view.id()})}">
+        <input type="hidden" name="peca">
+        <input type="hidden" name="lado">
+    </form>
+
+    <h2>Histórico</h2>
+    <ol class="historico">
+        <li th:each="l : ${view.historico()}" th:classappend="${l.ia()} ? 'ia' : ''">
+            <strong th:text="${l.jogador()}">Jogador</strong>
+            <span th:text="${l.descricao()}">jogou 6-6</span>
+            <em th:if="${l.comentario() != null}" th:text="'- &quot;' + ${l.comentario()} + '&quot;'"></em>
+        </li>
+    </ol>
+</main>
+
+<div class="aviso-processando">A IA está jogando...</div>
+</body>
+</html>

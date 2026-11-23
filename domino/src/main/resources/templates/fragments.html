@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<!-- Desenha uma peça de dominó com bolinhas. Uso: ~{fragments :: peca(2, 5)} -->
+<div th:fragment="peca(a, b)" class="peca">
+    <div class="half" th:classappend="'n' + ${a}"><span th:each="i : ${#numbers.sequence(1, 9)}"></span></div>
+    <div class="divider"></div>
+    <div class="half" th:classappend="'n' + ${b}"><span th:each="i : ${#numbers.sequence(1, 9)}"></span></div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Ranking - Dominó vs IA</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <script th:src="@{/js/ranking.js}" defer></script>
+</head>
+<body>
+<main class="container">
+    <nav class="topbar">
+        <a th:href="@{/}">Voltar ao início</a>
+    </nav>
+
+    <h1>Ranking</h1>
+    <p class="subtitulo">Ordenado por partidas ganhas. A IA também disputa o ranking.</p>
+
+    <p class="sucesso" th:if="${mensagem != null}" th:text="${mensagem}"></p>
+    <p class="erro" th:if="${erro != null}" th:text="${erro}"></p>
+
+    <section class="dash" th:if="${dash.totalPartidas() > 0}">
+        <h2>Painel</h2>
+
+        <div class="cards-resumo">
+            <div class="card-num">
+                <span class="num" th:text="${dash.totalPartidas()}">0</span>
+                <span class="rot">Partidas finalizadas</span>
+            </div>
+            <div class="card-num ia">
+                <span class="num" th:text="${dash.vitoriasIA()}">0</span>
+                <span class="rot">Vitórias da IA</span>
+            </div>
+            <div class="card-num hum">
+                <span class="num" th:text="${dash.vitoriasHumanos()}">0</span>
+                <span class="rot">Vitórias dos humanos</span>
+            </div>
+            <div class="card-num">
+                <span class="num" th:text="${dash.empates()}">0</span>
+                <span class="rot">Empates</span>
+            </div>
+        </div>
+
+        <div class="dash-grid">
+            <div class="painel">
+                <h3>IA contra humanos</h3>
+                <div class="donut-area">
+                    <div class="donut" th:style="'background:' + ${dash.gradiente()}">
+                        <div class="furo">
+                            <strong th:text="${dash.percentIA()} + '%'">0%</strong>
+                            <small>vitórias da IA</small>
+                        </div>
+                    </div>
+                    <ul class="legenda">
+                        <li><span class="cor c-ia"></span>IA: <strong th:text="${dash.vitoriasIA()}">0</strong>
+                            (<span th:text="${dash.percentIA()}">0</span>%)</li>
+                        <li><span class="cor c-hum"></span>Humanos: <strong th:text="${dash.vitoriasHumanos()}">0</strong>
+                            (<span th:text="${dash.percentHumanos()}">0</span>%)</li>
+                        <li><span class="cor c-emp"></span>Empates: <strong th:text="${dash.empates()}">0</strong>
+                            (<span th:text="${dash.percentEmpates()}">0</span>%)</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="painel">
+                <h3>Top 3</h3>
+                <div class="podio">
+                    <div class="degrau" th:each="r : ${dash.top3()}" th:classappend="'p' + ${r.posicao()}">
+                        <span class="pod-nome" th:text="${r.nome()}">Nome</span>
+                        <span class="badge-ia" th:if="${r.ia()}">IA</span>
+                        <span class="pod-vit" th:text="${r.vitorias()} + ' vitória(s)'">0</span>
+                        <div class="base" th:text="${r.posicao()}">1</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="dash-grid">
+            <div class="painel">
+                <h3>Vitórias por jogador</h3>
+                <div class="barra-linha" th:each="b : ${dash.barras()}">
+                    <span class="barra-nome">
+                        <span th:text="${b.nome()}">Nome</span>
+                        <span class="badge-ia" th:if="${b.ia()}">IA</span>
+                    </span>
+                    <div class="barra-trilho">
+                        <div class="barra" th:classappend="${b.ia()} ? 'ia' : ''"
+                             th:style="'width:' + ${b.largura()} + '%'"></div>
+                    </div>
+                    <span class="barra-valor" th:text="${b.vitorias()}">0</span>
+                </div>
+            </div>
+
+            <div class="painel">
+                <h3>Últimas partidas</h3>
+                <table class="tabela mini">
+                    <thead>
+                    <tr><th>Data</th><th>Jogador</th><th>Resultado</th></tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="u : ${dash.ultimas()}">
+                        <td th:text="${u.data()}">01/01 12:00</td>
+                        <td th:text="${u.humano()}">Nome</td>
+                        <td>
+                            <span th:if="${u.empate()}">Empate</span>
+                            <span th:if="${!u.empate() and u.iaVenceu()}" class="res-ia">IA venceu</span>
+                            <span th:if="${!u.empate() and !u.iaVenceu()}" class="res-hum">Venceu</span>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
+    <h2>Classificação</h2>
+    <p th:if="${ranking.isEmpty()}">Ainda não há partidas finalizadas. Seja o primeiro a jogar!</p>
+
+    <table class="tabela" th:unless="${ranking.isEmpty()}">
+        <thead>
+        <tr>
+            <th>#</th>
+            <th>Jogador</th>
+            <th>Vitórias</th>
+            <th>Partidas</th>
+            <th>Aproveitamento</th>
+            <th>Ações</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="r : ${ranking}" th:classappend="${r.ia()} ? 'linha-ia' : ''">
+            <td th:text="${r.posicao()}">1</td>
+            <td>
+                <span th:text="${r.nome()}">Nome</span>
+                <span class="badge-ia" th:if="${r.ia()}">IA</span>
+            </td>
+            <td th:text="${r.vitorias()}">0</td>
+            <td th:text="${r.partidas()}">0</td>
+            <td th:text="${r.aproveitamento()} + '%'">0%</td>
+            <td>
+                <form th:if="${!r.ia()}" th:action="@{/ranking/{id}/remover(id=${r.id()})}" method="post"
+                      th:attr="data-confirma=|Remover ${r.nome()} do ranking? As partidas dele também serão apagadas.|">
+                    <button type="submit" class="btn perigo pequeno">Remover</button>
+                </form>
+                <span th:if="${r.ia()}" class="info">-</span>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+
+    <div class="acoes-ranking">
+        <a class="btn" th:href="@{/}">Jogar agora</a>
+        <form th:action="@{/ranking/limpar}" method="post"
+              data-confirma="Limpar o ranking inteiro? Todas as partidas e jogadores serão apagados (inclusive partidas em andamento).">
+            <button type="submit" class="btn perigo">Limpar ranking</button>
+        </form>
+    </div>
+</main>
+</body>
+</html>

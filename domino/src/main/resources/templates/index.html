@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Dominó IA</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<main class="container">
+    <h1>Dominó IA</h1>
+    <p class="subtitulo">Você vs IA</p>
+    <p class="subtitulo"> Desafie a inteligência artificial em uma partida de dominó.</p>
+
+    <p class="erro" th:if="${erro != null}" th:text="${erro}"></p>
+
+    <section class="card">
+        <h2>Nova partida</h2>
+        <form th:action="@{/partidas}" method="post" class="form-inicio">
+            <label for="nome">Seu nome</label>
+            <input type="text" id="nome" name="nome" maxlength="30" placeholder="Ex: Mariana" required autofocus>
+            <button type="submit" class="btn">Jogar</button>
+        </form>
+    </section>
+
+    <section class="card">
+        <h2>Regras do Jogo</h2>
+        <ul>
+            <li>Dominó duplo-seis para dois jogadores: cada um começa com 7 peças e o resto vai para o monte.</li>
+            <li>Começa quem tiver a maior dupla (ou a peça de maior soma).</li>
+            <li>Na sua vez, arraste uma peça da sua mão até uma das pontas da mesa.</li>
+            <li>Sem peça para jogar? Compre do monte. Monte vazio? Passe a vez.</li>
+            <li>Vence quem bater primeiro. Se o jogo travar, vence quem tiver menos pontos na mão.</li>
+        </ul>
+    </section>
+
+    <p><a class="btn secundario" th:href="@{/ranking}">Ver ranking</a></p>
+</main>
+</body>
+</html>
